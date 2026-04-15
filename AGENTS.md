@@ -7,6 +7,8 @@
 - If data is missing, keep placeholders.
 - Do not add unnecessary dependencies.
 - Keep the project simple and extensible.
+- Never hardcode secrets or tokens in code.
+- Never print tokens or secrets in logs.
 - Bot must not make trading decisions.
 - Bot must not connect to exchanges.
 - Bot works only with local journal and analytics files.

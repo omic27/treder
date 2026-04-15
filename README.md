@@ -9,7 +9,7 @@ Minimal local Telegram bot for journal operations and analytics delivery.
 ### What the bot does
 
 - Reads local project files from `data/`, `config/`, and `reports/`
-- Shows basic stats summary from recorded trades/equity
+- Shows stats summary from recorded trades/equity
 - Shows current deposit and recent trades
 - Runs manual stats update command
 - Runs manual risk-rules check command
@@ -22,41 +22,57 @@ Minimal local Telegram bot for journal operations and analytics delivery.
 - Does not make trading decisions
 - Does not require external trading integrations in v1
 
-### Local run
+### Setup `.env`
 
-1. Create virtual environment and install dependencies:
+1. Create `.env` from template:
 
 ```bash
-python -m venv .venv
+cp .env.example .env
+```
+
+2. Open `.env` and manually set token value (do not commit secrets):
+
+```env
+TELEGRAM_BOT_TOKEN=PASTE_NEW_TOKEN_HERE
+BOT_OWNER_CHAT_ID=
+PROJECT_ROOT=
+ENABLE_GIT_PUSH=false
+```
+
+### Install dependencies
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Create `.env` from `.env.example` and fill at least:
-
-- `TELEGRAM_BOT_TOKEN`
-- `PROJECT_ROOT` (optional; defaults to current repository root)
-
-3. Run bot:
+### Run bot locally
 
 ```bash
-python -m bot.main
+python3 -m bot.main
 ```
 
-### Available commands
+### Commands
+
+- `/start` - bot info and scope
+- `/help` - available commands
+- `/stats` - total trades, win rate, total pnl, current deposit, average R
+- `/deposit` - current deposit
+- `/lasttrades` - latest 5 trades
+- `/addtrade` - trade input template
+- `/update` - refresh `reports/stats.md`
+- `/checkrules` - validate `config/risk_rules.json`
+- `/weekly` - show `reports/weekly_review.md`
+
+### Quick command check
 
 - `/start`
-- `/help`
 - `/stats`
-- `/deposit`
-- `/lasttrades`
-- `/addtrade`
-- `/update`
 - `/checkrules`
-- `/weekly`
 
 ### Helper scripts
 
-- `python scripts/update_stats.py`
-- `python scripts/check_rules.py`
-- `python scripts/weekly_review.py`
+- `python3 scripts/update_stats.py`
+- `python3 scripts/check_rules.py`
+- `python3 scripts/weekly_review.py`
