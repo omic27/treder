@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from bot.utils.csv_io import append_csv_row, read_csv_rows
@@ -37,7 +38,27 @@ def get_trades(project_root: Path) -> list[dict[str, str]]:
 
 def get_last_trades(project_root: Path, limit: int = 5) -> list[dict[str, str]]:
     rows = get_trades(project_root)
-    return rows[-limit:] if rows else []
+    if not rows:
+        return []
+    return list(reversed(rows[-limit:]))
+
+
+def get_history_page(
+    project_root: Path,
+    *,
+    page: int,
+    page_size: int = 10,
+) -> tuple[list[dict[str, str]], int, int, int]:
+    rows = list(reversed(get_trades(project_root)))
+    total_rows = len(rows)
+    if total_rows == 0:
+        return [], 0, 1, 0
+
+    total_pages = max(1, math.ceil(total_rows / page_size))
+    safe_page = min(max(page, 0), total_pages - 1)
+    start = safe_page * page_size
+    end = start + page_size
+    return rows[start:end], safe_page, total_pages, total_rows
 
 
 def add_trade(project_root: Path, trade: dict[str, str]) -> None:
@@ -47,8 +68,8 @@ def add_trade(project_root: Path, trade: dict[str, str]) -> None:
 
 def get_add_trade_template() -> str:
     return (
-        "Send one CSV line in this exact order:\n"
+        "Одна строка CSV в строгом порядке полей:\n"
         + ",".join(TRADE_FIELDS)
         + "\n"
-        "Use '-' for missing values."
+        "Если значения нет, поставьте '-'."
     )

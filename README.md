@@ -2,35 +2,57 @@
 
 BTC futures trading operating system for manual trade journaling, risk control, and analytics.
 
-## Telegram Bot v1
+## Telegram Bot v1 (русский интерфейс)
 
-Minimal local Telegram bot for journal operations and analytics delivery.
+Бот работает только с локальными файлами проекта (`data/`, `config/`, `reports/`) и помогает с учетом сделок и аналитикой.
 
-### What the bot does
+### Что бот делает
 
-- Reads local project files from `data/`, `config/`, and `reports/`
-- Shows stats summary from recorded trades/equity
-- Shows current deposit and recent trades
-- Runs manual stats update command
-- Runs manual risk-rules check command
-- Reads and returns weekly review content
+- Показывает статистику, депозит, последние сделки и историю сделок
+- Запускает ручное обновление статистики
+- Проверяет риск-правила по локальным данным
+- Показывает недельный обзор
 
-### What the bot does NOT do
+### Чего бот не делает
 
-- Does not place trades
-- Does not connect to any exchange API
-- Does not make trading decisions
-- Does not require external trading integrations in v1
+- Не торгует
+- Не подключается к бирже
+- Не принимает торговые решения
+- Не гарантирует доходность
 
-### Setup `.env`
+### Главное меню (reply keyboard)
 
-1. Create `.env` from template:
+- Статистика
+- Депозит
+- Последние сделки
+- Добавить сделку
+- Скрин сделки
+- Обновить статистику
+- Проверить правила
+- Недельный обзор
+- История
+- Помощь
+
+### Inline-навигация
+
+На релевантных экранах используются кнопки:
+- Назад
+- Обновить
+- Далее
+- Подтвердить
+- Изменить
+- Отменить
+- Главное меню
+
+### Настройка `.env`
+
+1. Создайте `.env` из шаблона:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Open `.env` and manually set token value (do not commit secrets):
+2. Откройте `.env` и вручную укажите токен:
 
 ```env
 TELEGRAM_BOT_TOKEN=PASTE_NEW_TOKEN_HERE
@@ -39,7 +61,9 @@ PROJECT_ROOT=
 ENABLE_GIT_PUSH=false
 ```
 
-### Install dependencies
+Важно: не коммитьте `.env` и не публикуйте токен.
+
+### Установка зависимостей
 
 ```bash
 python3 -m venv .venv
@@ -47,31 +71,39 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Run bot locally
+### Локальный запуск
 
 ```bash
 python3 -m bot.main
 ```
 
-### Commands
+### Команды
 
-- `/start` - bot info and scope
-- `/help` - available commands
-- `/stats` - total trades, win rate, total pnl, current deposit, average R
-- `/deposit` - current deposit
-- `/lasttrades` - latest 5 trades
-- `/addtrade` - trade input template
-- `/update` - refresh `reports/stats.md`
-- `/checkrules` - validate `config/risk_rules.json`
-- `/weekly` - show `reports/weekly_review.md`
+- `/start` — стартовое сообщение и меню
+- `/help` — справка
+- `/stats` — статистика
+- `/deposit` — депозит
+- `/lasttrades` — последние 5 сделок
+- `/history` — история по 10 сделок с кнопками Далее/Назад
+- `/addtrade` — шаблон ручного ввода
+- `/update` — пересчет статистики
+- `/checkrules` — проверка риск-правил
+- `/weekly` — недельный обзор
 
-### Quick command check
+### Первичная проверка
 
-- `/start`
-- `/stats`
-- `/checkrules`
+1. `/start`
+2. `/stats`
+3. `/checkrules`
 
-### Helper scripts
+### Безопасность токена
+
+- Не храните токен в коде.
+- Используйте только `.env`.
+- Не выводите токен в логи.
+- При диагностике включайте только безопасное логирование без URL с токеном.
+
+### Вспомогательные скрипты
 
 - `python3 scripts/update_stats.py`
 - `python3 scripts/check_rules.py`

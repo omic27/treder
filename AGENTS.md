@@ -1,16 +1,17 @@
 # Agent Rules
 
-- Do not delete historical trades.
-- Do not change CSV schema without an explicit user command.
-- Do not fabricate data.
-- Build analytics only from factual records.
-- If data is missing, keep placeholders.
-- Do not add unnecessary dependencies.
-- Keep the project simple and extensible.
-- Never hardcode secrets or tokens in code.
-- Never print tokens or secrets in logs.
-- Bot must not make trading decisions.
-- Bot must not connect to exchanges.
-- Bot works only with local journal and analytics files.
-- Any post-command change must remain compatible with current CSV schema.
-- While extending the project, do not break the existing structure.
+- Не удалять исторические сделки.
+- Не менять CSV schema без явной команды пользователя.
+- Не придумывать данные.
+- Строить аналитику только на фактических записях.
+- Если данных не хватает, оставлять placeholder.
+- Не добавлять лишние зависимости.
+- Держать проект простым и расширяемым.
+- Никогда не хардкодить секреты и токены.
+- Никогда не печатать токены в логах.
+- Все пользовательские ответы бота должны быть на русском языке.
+- Бот не должен принимать торговые решения.
+- Бот не должен подключаться к бирже.
+- Бот работает только с локальными файлами учета и аналитики.
+- Новые кнопки и команды должны быть согласованы с текущими handlers.
+- При расширении функционала не ломать существующую CSV schema и структуру проекта.

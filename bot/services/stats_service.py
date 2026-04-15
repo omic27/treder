@@ -29,6 +29,24 @@ def get_current_deposit(project_root: Path) -> float | None:
     return _to_float(rows[-1].get("deposit_after"))
 
 
+def get_max_drawdown(project_root: Path) -> float | None:
+    rows = read_csv_rows(equity_file(project_root))
+    deposits = [_to_float(row.get("deposit_after")) for row in rows]
+    deposits = [value for value in deposits if value is not None]
+    if not deposits:
+        return None
+
+    peak = deposits[0]
+    max_drawdown = 0.0
+    for value in deposits:
+        if value > peak:
+            peak = value
+        drawdown = peak - value
+        if drawdown > max_drawdown:
+            max_drawdown = drawdown
+    return max_drawdown
+
+
 def build_stats_summary(project_root: Path) -> dict[str, float | int | None]:
     trades = get_trades(project_root)
     total = len(trades)
@@ -45,36 +63,42 @@ def build_stats_summary(project_root: Path) -> dict[str, float | int | None]:
     total_pnl = sum(result_values) if result_values else 0.0
     win_rate = (len(wins) / len(result_values) * 100.0) if result_values else None
     avg_r = (sum(result_r_values) / len(result_r_values)) if result_r_values else None
+    avg_win = (sum(wins) / len(wins)) if wins else None
+    avg_loss = (sum(losses) / len(losses)) if losses else None
 
     return {
         "total_trades": total,
         "wins": len(wins),
         "losses": len(losses),
         "win_rate": win_rate,
+        "average_win": avg_win,
+        "average_loss": avg_loss,
         "total_pnl": total_pnl,
         "average_r": avg_r,
         "current_deposit": get_current_deposit(project_root),
+        "max_drawdown": get_max_drawdown(project_root),
     }
 
 
 def update_stats_report(project_root: Path) -> Path:
     stats = build_stats_summary(project_root)
     report_path = project_root / "reports" / "stats.md"
-    win_rate_text = "-" if stats["win_rate"] is None else f"{stats['win_rate']:.2f}%"
-    average_r_text = "-" if stats["average_r"] is None else f"{stats['average_r']:.2f}"
-    current_deposit_text = (
-        "-" if stats["current_deposit"] is None else f"{stats['current_deposit']:.2f} USDT"
-    )
+
+    def _fmt(value: float | None, suffix: str = "") -> str:
+        if value is None:
+            return "нет данных"
+        return f"{value:.2f}{suffix}"
+
     report = (
         "# Stats Report\n\n"
         f"## total trades\n{stats['total_trades']}\n\n"
-        f"## win rate\n{win_rate_text}\n\n"
-        "## average win\n-\n\n"
-        "## average loss\n-\n\n"
-        f"## average R\n{average_r_text}\n\n"
-        f"## total pnl\n{stats['total_pnl']:.2f} USDT\n\n"
-        f"## current deposit\n{current_deposit_text}\n\n"
-        "## max drawdown\n-\n\n"
+        f"## win rate\n{_fmt(stats['win_rate'], '%')}\n\n"
+        f"## average win\n{_fmt(stats['average_win'], ' USDT')}\n\n"
+        f"## average loss\n{_fmt(stats['average_loss'], ' USDT')}\n\n"
+        f"## average R\n{_fmt(stats['average_r'])}\n\n"
+        f"## total pnl\n{float(stats['total_pnl']):.2f} USDT\n\n"
+        f"## current deposit\n{_fmt(stats['current_deposit'], ' USDT')}\n\n"
+        f"## max drawdown\n{_fmt(stats['max_drawdown'], ' USDT')}\n\n"
         "## best setups\n-\n\n"
         "## worst setups\n-\n\n"
         "## rule violations\n-\n\n"
