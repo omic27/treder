@@ -1,0 +1,22 @@
+{
+  "symbol": "BTCUSDT",
+  "allowed_leverage": {
+    "min": 5,
+    "max": 10
+  },
+  "default_leverage": 5,
+  "max_open_positions": 1,
+  "max_trades_per_day": 3,
+  "max_daily_loss_usdt": 2,
+  "risk_percent": {
+    "small_account": 0.05,
+    "mid_account": 0.02,
+    "large_account": 0.01
+  },
+  "never_rules": [
+    "no averaging down",
+    "no moving stop farther",
+    "no trade without stop loss",
+    "no revenge trading"
+  ]
+}

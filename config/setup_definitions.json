@@ -1,0 +1,22 @@
+{
+  "setups": [
+    {
+      "name": "pullback_continuation",
+      "short_description": "Entry on pullback into trend continuation zone after momentum confirmation.",
+      "entry_logic": "Wait for directional trend, identify pullback to key level, enter on confirmation candle.",
+      "invalidation_logic": "Invalid if price closes beyond structure level opposite to trend before entry triggers."
+    },
+    {
+      "name": "false_breakout_reversal",
+      "short_description": "Fade failed breakout when price reclaims prior range.",
+      "entry_logic": "Detect breakout sweep, confirm rejection and re-entry into range, enter toward opposite side.",
+      "invalidation_logic": "Invalid if price accepts beyond breakout level with continuation volume."
+    },
+    {
+      "name": "breakout_retest",
+      "short_description": "Trade continuation after breakout and clean retest of broken level.",
+      "entry_logic": "Wait for breakout from consolidation, then retest hold of breakout level and trigger candle.",
+      "invalidation_logic": "Invalid if retest fails and price closes back inside consolidation range."
+    }
+  ]
+}
