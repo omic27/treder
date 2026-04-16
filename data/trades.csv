@@ -1,1 +1,1 @@
-trade_id,date_time,symbol,side,setup_name,timeframe_context,entry,stop_loss,tp1,tp2,leverage,deposit_before,risk_usdt,position_size_usdt,result_usdt,result_r,status,followed_plan,notes
+trade_id,date_time,symbol,side,setup_name,timeframe_context,entry,stop_loss,tp1,tp2,leverage,deposit_before,risk_usdt,position_size_usdt,result_usdt,result_r,status,followed_plan,notes,deposit_after,screenshot_path,source,created_at

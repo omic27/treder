@@ -22,8 +22,15 @@ from bot.handlers.trades import (
     add_trade_command,
     add_trade_confirm_command,
     add_trade_edit_command,
+    canceltrade_command,
+    confirmtrade_command,
+    handle_pending_callbacks,
+    intake_photo_message,
+    pending_command,
+    showdraft_command,
     trade_screenshot_command,
 )
+from bot.services.trades_service import ensure_storage
 from bot.utils.keyboards import (
     CB_ADD_TRADE,
     CB_ADD_TRADE_CANCEL,
@@ -35,6 +42,7 @@ from bot.utils.keyboards import (
     CB_HISTORY_PAGE_PREFIX,
     CB_LAST_TRADES,
     CB_MAIN_MENU,
+    CB_PENDING,
     CB_SCREEN,
     CB_STATS,
     CB_UPDATE,
@@ -74,7 +82,6 @@ class SecretMaskFilter(logging.Filter):
 def configure_logging(token: str) -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
-    # Avoid noisy transport logs where URLs may include sensitive values.
     for logger_name in ("httpx", "httpcore", "telegram", "telegram.ext"):
         logging.getLogger(logger_name).setLevel(logging.WARNING)
 
@@ -108,6 +115,9 @@ async def route_menu_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def route_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await handle_pending_callbacks(update, context):
+        return
+
     query = update.callback_query
     data = query.data if query and query.data else ""
 
@@ -129,6 +139,8 @@ async def route_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await check_rules_command(update, context)
     elif data == CB_WEEKLY:
         await weekly_command(update, context)
+    elif data == CB_PENDING:
+        await pending_command(update, context)
     elif data == CB_HISTORY or data.startswith(CB_HISTORY_PAGE_PREFIX):
         await history_command(update, context)
     elif data == CB_ADD_TRADE_CONFIRM:
@@ -146,6 +158,7 @@ def build_application() -> Application:
     if not settings.telegram_bot_token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN не задан. Добавьте токен в .env")
 
+    ensure_storage(settings.project_root)
     configure_logging(settings.telegram_bot_token)
 
     app = Application.builder().token(settings.telegram_bot_token).build()
@@ -156,11 +169,16 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("deposit", deposit_command))
     app.add_handler(CommandHandler("lasttrades", last_trades_command))
     app.add_handler(CommandHandler("history", history_command))
+    app.add_handler(CommandHandler("pending", pending_command))
+    app.add_handler(CommandHandler("showdraft", showdraft_command))
+    app.add_handler(CommandHandler("confirmtrade", confirmtrade_command))
+    app.add_handler(CommandHandler("canceltrade", canceltrade_command))
     app.add_handler(CommandHandler("addtrade", add_trade_command))
     app.add_handler(CommandHandler("update", update_command))
     app.add_handler(CommandHandler("checkrules", check_rules_command))
     app.add_handler(CommandHandler("weekly", weekly_command))
 
+    app.add_handler(MessageHandler(filters.PHOTO | filters.Document.IMAGE, intake_photo_message))
     app.add_handler(CallbackQueryHandler(route_callbacks))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_menu_buttons))
 

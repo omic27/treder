@@ -9,6 +9,8 @@ BTC futures trading operating system for manual trade journaling, risk control, 
 ### Что бот делает
 
 - Показывает статистику, депозит, последние сделки и историю сделок
+- Принимает скрин закрытой сделки и создает черновик
+- Подтверждает черновик и сохраняет сделку в CSV
 - Запускает ручное обновление статистики
 - Проверяет риск-правила по локальным данным
 - Показывает недельный обзор
@@ -19,6 +21,7 @@ BTC futures trading operating system for manual trade journaling, risk control, 
 - Не подключается к бирже
 - Не принимает торговые решения
 - Не гарантирует доходность
+- Не распознает данные со скрина через OCR в v1
 
 ### Главное меню (reply keyboard)
 
@@ -85,23 +88,77 @@ python3 -m bot.main
 - `/deposit` — депозит
 - `/lasttrades` — последние 5 сделок
 - `/history` — история по 10 сделок с кнопками Далее/Назад
+- `/pending` — черновики сделок
+- `/showdraft intake_id=...` — показать черновик
+- `/confirmtrade` — шаблон подтверждения
+- `/confirmtrade intake_id=... symbol=... side=... ...` — подтвердить черновик
+- `/canceltrade intake_id=...` — отменить черновик
 - `/addtrade` — шаблон ручного ввода
 - `/update` — пересчет статистики
 - `/checkrules` — проверка риск-правил
 - `/weekly` — недельный обзор
 
-### Первичная проверка
+## Скрин сделки v1
 
-1. `/start`
-2. `/stats`
-3. `/checkrules`
+Flow:
+1. Отправьте боту скрин закрытой сделки.
+2. Бот сохранит изображение и вернет `intake_id`.
+3. Подтвердите поля через `/confirmtrade`.
+4. После подтверждения сделка попадет в учет и статистику.
+
+### Где что хранится
+
+- Скрины: `data/screenshots/YYYY-MM/`
+- Черновики: `data/pending_trades.json`
+- Intake лог: `data/bot_intake_log.csv`
+- Журнал сделок: `reports/trade_journal.md`
+
+### Подтверждение черновика
+
+```text
+/confirmtrade
+```
+
+Бот вернет шаблон:
+
+```text
+intake_id=
+symbol=BTCUSDT
+side=long
+entry=
+stop_loss=
+tp1=
+tp2=
+leverage=
+deposit_before=
+deposit_after=
+risk_usdt=
+position_size_usdt=
+result_usdt=
+result_r=
+status=closed
+followed_plan=yes
+notes=
+```
+
+Можно отправить одной строкой:
+
+```text
+/confirmtrade intake_id=... symbol=BTCUSDT side=long entry=... stop_loss=... ...
+```
+
+### Отмена и просмотр черновика
+
+- Отмена: `/canceltrade intake_id=...`
+- Просмотр: `/showdraft intake_id=...`
+- Список pending: `/pending`
 
 ### Безопасность токена
 
 - Не храните токен в коде.
 - Используйте только `.env`.
 - Не выводите токен в логи.
-- При диагностике включайте только безопасное логирование без URL с токеном.
+- Логирование HTTP/Telegram снижено до безопасного уровня.
 
 ### Вспомогательные скрипты
 

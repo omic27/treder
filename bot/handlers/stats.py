@@ -6,47 +6,25 @@ from telegram.ext import ContextTypes
 from bot.config import get_settings
 from bot.services.stats_service import build_stats_summary, get_current_deposit, update_stats_report
 from bot.services.trades_service import get_history_page, get_last_trades
+from bot.utils.formatters import format_history_summary
 from bot.utils.keyboards import (
     CB_HISTORY_PAGE_PREFIX,
+    deposit_inline_keyboard,
     history_inline_keyboard,
     last_trades_inline_keyboard,
     stats_inline_keyboard,
     update_inline_keyboard,
-    deposit_inline_keyboard,
 )
 from bot.utils.messages import (
+    deposit_text,
     history_header,
     last_trades_header,
     no_trades_text,
     stats_text,
-    deposit_text,
     update_error_text,
     update_success_text,
-    value_or_placeholder,
 )
 from bot.utils.navigation import callback_data, edit_or_reply, parse_history_page, reply_text
-
-
-def _plan_label(value: str | None) -> str:
-    raw = (value or "").strip().lower()
-    if raw in {"yes", "true", "1", "да"}:
-        return "да"
-    if raw in {"no", "false", "0", "нет"}:
-        return "нет"
-    return "нет данных"
-
-
-def _compact_trade_line(index: int, trade: dict[str, str]) -> str:
-    dt = value_or_placeholder(trade.get("date_time"))
-    side = value_or_placeholder(trade.get("side")).upper()
-    entry = value_or_placeholder(trade.get("entry"))
-    result_usdt = value_or_placeholder(trade.get("result_usdt"))
-    result_r = value_or_placeholder(trade.get("result_r"))
-    plan = _plan_label(trade.get("followed_plan"))
-    return (
-        f"{index}. {dt} | {side} | вход: {entry} | "
-        f"результат: {result_usdt}$ | R: {result_r} | план: {plan}"
-    )
 
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -71,7 +49,7 @@ async def last_trades_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         await reply_text(update, no_trades_text(), reply_markup=last_trades_inline_keyboard())
         return
 
-    body = "\n".join(_compact_trade_line(i + 1, row) for i, row in enumerate(rows))
+    body = "\n".join(format_history_summary(i + 1, row) for i, row in enumerate(rows))
     text = f"{last_trades_header(5)}\n\n{body}"
     await reply_text(update, text, reply_markup=last_trades_inline_keyboard())
 
@@ -99,7 +77,7 @@ async def history_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         return
 
-    body = "\n".join(_compact_trade_line(i + 1 + safe_page * 10, row) for i, row in enumerate(rows))
+    body = "\n".join(format_history_summary(i + 1 + safe_page * 10, row) for i, row in enumerate(rows))
     text = f"{history_header(safe_page, total_pages, total_rows)}\n\n{body}"
     await edit_or_reply(
         update,
